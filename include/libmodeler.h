@@ -1,0 +1,103 @@
+#ifndef _HEADER_GUARD_LIBRARY_MODELER_H_
+#define _HEADER_GUARD_LIBRARY_MODELER_H_
+
+#include <allegro5/allegro5.h>
+#include <allegro5/allegro_primitives.h>
+#include <libogle.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+
+// Forward declarations
+
+typedef struct mod_vertex_buffer_tag_t mod_vertex_buffer_t;
+typedef struct ALLEGRO_VERTEX_DECL mod_vertex_decl_t;
+typedef struct ALLEGRO_VERTEX_ELEMENT mod_vertex_element_t;
+typedef struct mod_index_buffer_tag_t mod_index_buffer_t;
+typedef struct mod_mesh_tag_t mod_mesh_t;
+typedef struct mod_model_tag_t mod_model_t;
+typedef struct mod_triangle_tag_t mod_triangle_t;
+typedef struct mod_quad_tag_t mod_quad_t;
+
+struct mod_triangle_tag_t
+{
+	o_vertex_t v1;
+	o_vertex_t v2;
+	o_vertex_t v3;
+};
+
+struct mod_quad_tag_t
+{
+	o_vertex_t v1;
+	o_vertex_t v2;
+	o_vertex_t v3;
+	o_vertex_t v4;
+};
+
+// Function declarations
+
+void mod_triangle_init(mod_triangle_t* triangle, const o_vertex_t* v1, const o_vertex_t* v2, const o_vertex_t* v3);
+void mod_triangle_init_v(mod_triangle_t* triangle, o_vector3_t v1, o_vector3_t v2, o_vector3_t v3);
+void mod_triangle_recolor(mod_triangle_t* triangle, o_color_t color);
+void mod_quad_init(mod_quad_t* quad, const o_vertex_t* v1, const o_vertex_t* v2, const o_vertex_t* v3, const o_vertex_t* v4);
+void mod_quad_init_v(mod_quad_t* quad, o_vector3_t v1, o_vector3_t v2, o_vector3_t v3, o_vector3_t v4);
+void mod_quad_init_p(mod_quad_t* quad, o_vector3_t center, o_vector3_t corner);
+void mod_quad_recolor(mod_quad_t* quad, o_color_t color);
+
+mod_vertex_buffer_t* mod_vertex_buffer_create(mod_vertex_decl_t* decl, const o_vertex_t* vertices, size_t count, int32_t flags);
+void mod_vertex_buffer_destroy(mod_vertex_buffer_t* vertex_buffer);
+o_vertex_t* mod_vertex_buffer_lock(mod_vertex_buffer_t* vertex_buffer, size_t offset, size_t length, int flags);
+void mod_vertex_buffer_unlock(mod_vertex_buffer_t* vertex_buffer);
+size_t mod_vertex_buffer_get_count(const mod_vertex_buffer_t* vertex_buffer);
+
+mod_index_buffer_t* mod_index_buffer_create(const int32_t* indices, size_t count, int32_t flags);
+void mod_index_buffer_destroy(mod_index_buffer_t* index_buffer);
+int32_t* mod_index_buffer_lock(mod_index_buffer_t* index_buffer, size_t offset, size_t length, int flags);
+void mod_index_buffer_unlock(mod_index_buffer_t* index_buffer);
+size_t mod_index_buffer_get_count(const mod_index_buffer_t* index_buffer);
+
+mod_model_t* mod_model_create_empty();
+mod_model_t* mod_model_create(const o_vertex_t* vertices, size_t vertex_count, const int32_t* indices, size_t index_count);
+void mod_model_destroy(mod_model_t* model);
+o_vertex_t* mod_model_get_vertices(mod_model_t* model);
+const o_vertex_t* mod_model_get_vertices_const(const mod_model_t* model);
+size_t mod_model_get_vertex_count(const mod_model_t* model);
+int32_t* mod_model_get_indices(mod_model_t* model);
+const int32_t* mod_model_get_indices_const(const mod_model_t* model);
+size_t mod_model_get_index_count(const mod_model_t* model);
+bool mod_model_push_vertex(mod_model_t* model, const o_vertex_t* vertex);
+bool mod_model_push_vertices(mod_model_t* model, const o_vertex_t* vertices, size_t count);
+bool mod_model_pop_vertex(mod_model_t* model);
+bool mod_model_pop_vertices(mod_model_t* model, size_t count);
+bool mod_model_push_index(mod_model_t* model, int32_t index);
+bool mod_model_push_indices(mod_model_t* model, const int32_t* indices, size_t count);
+bool mod_model_pop_index(mod_model_t* model);
+bool mod_model_pop_indices(mod_model_t* model, size_t count);
+bool mod_model_add_triangle(mod_model_t* model, const mod_triangle_t* triangle, bool merge_vertices);
+bool mod_model_add_triangle_v(mod_model_t* model, const o_vertex_t* v1, const o_vertex_t* v2, const o_vertex_t* v3, bool merge_vertices);
+bool mod_model_add_quad(mod_model_t* model, const mod_quad_t* quad, bool merge_vertices);
+bool mod_model_add_quad_v(mod_model_t* model, const o_vertex_t* v1, const o_vertex_t* v2, const o_vertex_t* v3, const o_vertex_t* v4, bool merge_vertices);
+bool mod_model_add_model(mod_model_t* model, const mod_model_t* other_model, bool merge_vertices);
+bool mod_model_add_shape(mod_model_t* model, const o_vertex_t* vertices, size_t vertex_count, const int32_t* indices, size_t index_count, bool merge_vertices);
+void mod_model_rotate(mod_model_t* model, o_vector3_t rotation, float angle);
+void mod_model_rotate_f(mod_model_t* model, float x, float y, float z, float angle);
+void mod_model_scale(mod_model_t* model, o_vector3_t scale);
+void mod_model_scale_f(mod_model_t* model, float x, float y, float z);
+void mod_model_translate(mod_model_t* model, o_vector3_t translation);
+void mod_model_translate_f(mod_model_t* model, float x, float y, float z);
+void mod_model_recolor(mod_model_t* model, o_color_t color);
+void mod_model_recolor_f(mod_model_t* model, float r, float g, float b, float a);
+void mod_model_recalculate_normals(mod_model_t* model);
+
+mod_mesh_t* mod_mesh_create(mod_vertex_decl_t* decl, const mod_model_t* model, int32_t flags);
+mod_mesh_t* mod_mesh_create_v(mod_vertex_decl_t* decl, const o_vertex_t* vertices, size_t vertex_count, const int32_t* indices, size_t index_count, int32_t flags);
+void mod_mesh_destroy(mod_mesh_t* mesh);
+mod_vertex_buffer_t* mod_mesh_get_vertex_buffer(mod_mesh_t* mesh);
+const mod_vertex_buffer_t* mod_mesh_get_vertex_buffer_const(const mod_mesh_t* mesh);
+mod_index_buffer_t* mod_mesh_get_index_buffer(mod_mesh_t* mesh);
+const mod_index_buffer_t* mod_mesh_get_index_buffer_const(const mod_mesh_t* mesh);
+void mod_mesh_render(const mod_mesh_t* mesh, o_texture_t* texture);
+
+#endif // !_HEADER_GUARD_LIBRARY_MODELER_H_
