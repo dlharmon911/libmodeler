@@ -3,6 +3,7 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Project Path="../libogle/libogle.vcxproj" Id="9039a8de-fb9e-43cd-b32c-2c42e6ec7a3c" />
   <Project Path="libmodeler.vcxproj" Id="58a9d288-3318-4d88-9f3e-61e3ee3666ef" />
   <Project Path="test/test.vcxproj" Id="cb3f0868-f219-450f-a120-3d829b3c38b5" />
 </Solution>

@@ -7,6 +7,11 @@ void mod_triangle_init(mod_triangle_t* triangle, const o_vertex_t* v1, const o_v
 		return;
 	}
 
+	if (v1 == v2 || v1 == v3 || v2 == v3)
+	{
+		return;
+	}
+
 	memcpy(&triangle->v1, v1, sizeof(o_vertex_t));
 	memcpy(&triangle->v2, v2, sizeof(o_vertex_t));
 	memcpy(&triangle->v3, v3, sizeof(o_vertex_t));

@@ -168,6 +168,12 @@
   <ItemGroup>
     <ClCompile Include="src\mod_index_buffer.c" />
     <ClCompile Include="src\mod_mesh.c" />
+    <ClCompile Include="src\mod_mesh_cube.c" />
+    <ClCompile Include="src\mod_mesh_cuboid.c" />
+    <ClCompile Include="src\mod_mesh_icosahedron.c" />
+    <ClCompile Include="src\mod_mesh_pyramid.c" />
+    <ClCompile Include="src\mod_mesh_tile.c" />
+    <ClCompile Include="src\mod_mesh_tube.c" />
     <ClCompile Include="src\mod_model.c" />
     <ClCompile Include="src\mod_quad.c" />
     <ClCompile Include="src\mod_triangle.c" />

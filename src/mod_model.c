@@ -71,6 +71,53 @@ mod_model_t* mod_model_create(const o_vertex_t* vertices, size_t vertex_count, c
 	return model;
 }
 
+
+mod_model_t* mod_model_clone(const mod_model_t* model)
+{
+	mod_model_t* new_model = NULL;
+
+	if (NULL == model)
+	{
+		return NULL;
+	}
+
+	size_t vertex_count = mod_model_get_vertex_count(model);
+	size_t index_count = mod_model_get_index_count(model);
+	const o_vertex_t* vertices = mod_model_get_vertices_const(model);
+	const int32_t* indices = mod_model_get_indices_const(model);
+
+	if (vertex_count == 0 || index_count == 0 || NULL == vertices || NULL == indices)
+	{
+		return mod_model_create_empty();
+	}
+
+	return mod_model_create(vertices, vertex_count, indices, index_count);
+}
+
+mod_model_t* mod_model_clone_with_meta_data(const mod_model_t* model, const mod_transform_t* meta_data)
+{
+	mod_model_t* new_model = NULL;
+	
+	if (NULL == model)
+	{
+		return NULL;
+	}
+	
+	new_model = mod_model_clone(model);
+	
+	if (NULL == new_model)
+	{
+		return NULL;
+	}
+	
+	if (meta_data)
+	{
+		mod_model_apply_meta_data(new_model, meta_data);
+	}
+
+	return new_model;
+}
+
 void mod_model_destroy(mod_model_t* model)
 {
 	if (NULL == model)
@@ -93,6 +140,20 @@ void mod_model_destroy(mod_model_t* model)
 	ogle_free(model);
 }
 
+void mod_model_apply_meta_data(mod_model_t* model, const mod_transform_t* meta_data)
+{
+	if (NULL == model || NULL == meta_data)
+	{
+		return;
+	}
+	mod_model_rotate(model, MOD_X_ROTATION, meta_data->m_rotation.m_x);
+	mod_model_rotate(model, MOD_Y_ROTATION, meta_data->m_rotation.m_y);
+	mod_model_rotate(model, MOD_Z_ROTATION, meta_data->m_rotation.m_z);
+	mod_model_translate(model, meta_data->m_translation);
+	mod_model_scale(model, meta_data->m_scale);
+	mod_model_recolor(model, meta_data->m_color);
+}
+
 o_vertex_t* mod_model_get_vertices(mod_model_t* model)
 {
 	if (NULL == model || NULL == model->m_vertices)
@@ -101,6 +162,40 @@ o_vertex_t* mod_model_get_vertices(mod_model_t* model)
 	}
 
 	return model->m_vertices;
+}
+
+o_vertex_t* mod_model_get_vertex(mod_model_t* model, size_t index)
+{
+	if (NULL == model || NULL == model->m_vertices)
+	{
+		return NULL;
+	}
+
+	size_t vertex_count = ogle_darray_size(model->m_vertices);
+
+	if (index >= vertex_count)
+	{
+		return NULL;
+	}
+
+	return &model->m_vertices[index];
+}
+
+const o_vertex_t* mod_model_get_vertex_const(const mod_model_t* model, size_t index)
+{
+	if (NULL == model || NULL == model->m_vertices)
+	{
+		return NULL;
+	}
+
+	size_t vertex_count = ogle_darray_size(model->m_vertices);
+
+	if (index >= vertex_count)
+	{
+		return NULL;
+	}
+
+	return &model->m_vertices[index];
 }
 
 const o_vertex_t* mod_model_get_vertices_const(const mod_model_t* model)
@@ -141,6 +236,23 @@ const int32_t* mod_model_get_indices_const(const mod_model_t* model)
 	}
 
 	return model->m_indices;
+}
+
+int32_t mod_model_get_index(mod_model_t* model, size_t index)
+{
+	if (NULL == model || NULL == model->m_indices)
+	{
+		return -1;
+	}
+	
+	size_t index_count = ogle_darray_size(model->m_indices);
+	
+	if (index >= index_count)
+	{
+		return -1;
+	}
+	
+	return model->m_indices[index];
 }
 
 size_t mod_model_get_index_count(const mod_model_t* model)
@@ -379,6 +491,11 @@ bool mod_model_add_triangle(mod_model_t* model, const mod_triangle_t* triangle, 
 		return false;
 	}
 
+	if (indices[0] == indices[1] || indices[1] == indices[2] || indices[2] == indices[0])
+	{
+		return false;
+	}
+
 	if (!mod_model_push_indices(model, indices, 3))
 	{
 		return false;
@@ -412,6 +529,8 @@ bool mod_model_add_quad(mod_model_t* model, const mod_quad_t* quad, bool merge_v
 	{
 		return false;
 	}
+
+	size_t vertex_count = mod_model_get_vertex_count(model);
 
 	return true;
 }
@@ -456,6 +575,27 @@ bool mod_model_add_model(mod_model_t* model, const mod_model_t* other_model, boo
 	return mod_model_add_shape(model, vertices, vertex_count, indices, index_count, merge_vertices);
 }
 
+bool mod_model_add_model_with_meta_data(mod_model_t* model, const mod_model_t* other_model, const mod_transform_t* meta_data, bool merge_vertices)
+{
+	if (NULL == model || NULL == other_model || NULL == other_model->m_vertices || NULL == other_model->m_indices)
+	{
+		return false;
+	}
+	mod_model_t* transformed_model = mod_model_clone(other_model);
+	if (NULL == transformed_model)
+	{
+		return false;
+	}
+	if (meta_data)
+	{
+		mod_model_apply_meta_data(transformed_model, meta_data);
+	}
+
+	bool result = mod_model_add_model(model, transformed_model, merge_vertices);
+	mod_model_destroy(transformed_model);
+	return result;
+}
+
 bool mod_model_add_shape(mod_model_t* model, const o_vertex_t* vertices, size_t vertex_count, const int32_t* indices, size_t index_count, bool merge_vertices)
 {
 	if (NULL == model || NULL == vertices || NULL == indices || 0 == vertex_count || 0 == index_count)
@@ -465,9 +605,13 @@ bool mod_model_add_shape(mod_model_t* model, const o_vertex_t* vertices, size_t 
 
 	for (size_t i = 0; i < index_count; i += 3)
 	{
-		const o_vertex_t* v1 = (vertices + i);
-		const o_vertex_t* v2 = (vertices + i + 1);
-		const o_vertex_t* v3 = (vertices + i + 2);
+		int32_t i1 = indices[i];
+		int32_t i2 = indices[i + 1];
+		int32_t i3 = indices[i + 2];
+
+		const o_vertex_t* v1 = (vertices + i1);
+		const o_vertex_t* v2 = (vertices + i2);
+		const o_vertex_t* v3 = (vertices + i3);
 
 		if (!mod_model_add_triangle_v(model, v1, v2, v3, merge_vertices))
 		{
@@ -497,9 +641,9 @@ void mod_model_rotate_f(mod_model_t* model, float x, float y, float z, float ang
 		o_vertex_t* vector = (model->m_vertices + i);
 		o_vector3_t pos = vector->m_position;
 
-		pos = ogle_vector3_rotate_yz(pos, x * angle);
-		pos = ogle_vector3_rotate_xz(pos, y * angle);
-		pos = ogle_vector3_rotate_xy(pos, z * angle);
+		pos = ogle_vector3_rotate_yz(pos, x * angle * OGLE_MATH_TAU);
+		pos = ogle_vector3_rotate_xz(pos, y * angle * OGLE_MATH_TAU);
+		pos = ogle_vector3_rotate_xy(pos, z * angle * OGLE_MATH_TAU);
 
 		vector->m_position = pos;
 	}
@@ -579,16 +723,36 @@ void mod_model_recolor_f(mod_model_t* model, float r, float g, float b, float a)
 	}
 }
 
+o_vector3_t mod_model_get_center(const mod_model_t* model)
+{
+	if (NULL == model || NULL == model->m_vertices)
+	{
+		return (o_vector3_t) { 0.0f, 0.0f, 0.0f };
+	}
+	size_t vertex_count = mod_model_get_vertex_count(model);
+	if (vertex_count == 0)
+	{
+		return (o_vector3_t) { 0.0f, 0.0f, 0.0f };
+	}
+	o_vector3_t center = { 0.0f, 0.0f, 0.0f };
+	for (size_t i = 0; i < vertex_count; ++i)
+	{
+		const o_vertex_t* vertex = &model->m_vertices[i];
+		center = ogle_vector3_add(center, vertex->m_position);
+	}
+	center = ogle_vector3_div_ff(center, (float)vertex_count);
+	return center;
+}
+
 static o_vector3_t mod_model_calculate_normal(const mod_model_t* model, size_t index)
 {
 	o_vector3_t result = { 0.0f, 0.0f, 0.0f };
-	size_t count = 0;
 	size_t triangle_count = mod_model_get_index_count(model) / 3;
 
 	for (size_t i = 0; i < triangle_count; ++i)
 	{
 		size_t idx = i * 3;
-		
+
 		int32_t index1 = model->m_indices[idx];
 		int32_t index2 = model->m_indices[idx + 1];
 		int32_t index3 = model->m_indices[idx + 2];
@@ -598,21 +762,16 @@ static o_vector3_t mod_model_calculate_normal(const mod_model_t* model, size_t i
 			o_vector3_t v1 = model->m_vertices[index1].m_position;
 			o_vector3_t v2 = model->m_vertices[index2].m_position;
 			o_vector3_t v3 = model->m_vertices[index3].m_position;
+
 			o_vector3_t edge1 = ogle_vector3_sub(v2, v1);
 			o_vector3_t edge2 = ogle_vector3_sub(v3, v1);
 			o_vector3_t normal = ogle_vector3_cross(edge1, edge2);
+
 			result = ogle_vector3_add(result, normal);
-			count++;
 		}
 	}
 
-	if (count > 0)
-	{
-		result = ogle_vector3_div_ff(result, (float)count);
-		result = ogle_vector3_normalize(result);
-	}
-
-	return result;
+	return ogle_vector3_normalize(result);
 }
 
 void mod_model_recalculate_normals(mod_model_t* model)
@@ -632,3 +791,34 @@ void mod_model_recalculate_normals(mod_model_t* model)
 	}
 }
 
+void mod_model_render(mod_vertex_decl_t* decl, const mod_model_t* model, o_texture_t* texture)
+{
+	if (NULL == model)
+	{
+		return;
+	}
+
+	size_t index_count = mod_model_get_index_count(model);
+
+	al_draw_indexed_prim(
+		model->m_vertices,
+		decl,
+		(ALLEGRO_BITMAP*)texture,
+		model->m_indices,
+		(int32_t)index_count,
+		ALLEGRO_PRIM_TRIANGLE_LIST);
+}
+
+void mod_model_set_id(mod_model_t* model, int32_t id)
+{
+	if (NULL == model || NULL == model->m_vertices)
+	{
+		return;
+	}
+	size_t vertex_count = mod_model_get_vertex_count(model);
+	for (size_t i = 0; i < vertex_count; ++i)
+	{
+		o_vertex_t* vector = (model->m_vertices + i);
+		vector->m_meta = (float)id;
+	}
+}
