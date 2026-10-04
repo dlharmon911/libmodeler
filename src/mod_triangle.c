@@ -12,9 +12,9 @@ void mod_triangle_init(mod_triangle_t* triangle, const o_vertex_t* v1, const o_v
 		return;
 	}
 
-	memcpy(&triangle->v1, v1, sizeof(o_vertex_t));
-	memcpy(&triangle->v2, v2, sizeof(o_vertex_t));
-	memcpy(&triangle->v3, v3, sizeof(o_vertex_t));
+	memcpy(&triangle->m_vertex[0], v1, sizeof(o_vertex_t));
+	memcpy(&triangle->m_vertex[1], v2, sizeof(o_vertex_t));
+	memcpy(&triangle->m_vertex[2], v3, sizeof(o_vertex_t));
 }
 
 void mod_triangle_init_v(mod_triangle_t* triangle, o_vector3_t v1, o_vector3_t v2, o_vector3_t v3)
@@ -38,7 +38,7 @@ void mod_triangle_recolor(mod_triangle_t* triangle, o_color_t color)
 		return;
 	}
 
-	triangle->v1.m_color = color;
-	triangle->v2.m_color = color;
-	triangle->v3.m_color = color;
+	triangle->m_vertex[0].m_color = color;
+	triangle->m_vertex[1].m_color = color;
+	triangle->m_vertex[2].m_color = color;
 }

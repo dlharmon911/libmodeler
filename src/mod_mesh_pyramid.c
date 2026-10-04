@@ -127,6 +127,36 @@ static int32_t _mod_pyramid_generate2(mod_pyramid_context_t* context, float radi
     return 0;
 }
 
+static void mod_pyramid_center(mod_model_t* model)
+{
+	o_vector3_t center = { 0 };
+	size_t vertex_count = ogle_darray_size(model->m_vertices);
+	size_t index_count = ogle_darray_size(model->m_indices);
+	size_t triangle_count = index_count / 3;
+
+	for (size_t i = 0; i < triangle_count; ++i)
+	{
+		int32_t i0 = *(model->m_indices + i * 3 + 0);
+		int32_t i1 = *(model->m_indices + i * 3 + 1);
+		int32_t i2 = *(model->m_indices + i * 3 + 2);
+
+		o_vector3_t v0 = (model->m_vertices + i0)->m_position;
+		o_vector3_t v1 = (model->m_vertices + i1)->m_position;
+		o_vector3_t v2 = (model->m_vertices + i2)->m_position;
+
+		center.m_x = (v0.m_x + v1.m_x + v2.m_x) / 3.0f;
+		center.m_y = (v0.m_y + v1.m_y + v2.m_y) / 3.0f;
+		center.m_z = (v0.m_z + v1.m_z + v2.m_z) / 3.0f;
+	}
+
+	center = ogle_vector3_div_ff(center, (float)vertex_count);
+	
+	for (size_t i = 0; i < vertex_count; ++i)
+	{
+		(model->m_vertices + i)->m_position = ogle_vector3_sub((model->m_vertices + i)->m_position, center);
+	}
+}
+
 static mod_model_t* _mod_pyramid_generate(float radius, float height, size_t sides, bool withbase, bool merge_vertices)
 {
 	mod_model_t* model = NULL;
@@ -149,6 +179,8 @@ static mod_model_t* _mod_pyramid_generate(float radius, float height, size_t sid
 	}
 
 	_mod_pyramid_context_destroy(&context);
+
+	mod_pyramid_center(model);
 
 	return model;
 }

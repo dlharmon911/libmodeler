@@ -7,10 +7,10 @@ void mod_quad_init(mod_quad_t* quad, const o_vertex_t* v1, const o_vertex_t* v2,
 		return;
 	}
 
-	memcpy(&quad->v1, v1, sizeof(o_vertex_t));
-	memcpy(&quad->v2, v2, sizeof(o_vertex_t));
-	memcpy(&quad->v3, v3, sizeof(o_vertex_t));
-	memcpy(&quad->v4, v4, sizeof(o_vertex_t));
+	memcpy(&quad->m_vertex[0], v1, sizeof(o_vertex_t));
+	memcpy(&quad->m_vertex[1], v2, sizeof(o_vertex_t));
+	memcpy(&quad->m_vertex[2], v3, sizeof(o_vertex_t));
+	memcpy(&quad->m_vertex[3], v4, sizeof(o_vertex_t));
 }
 
 void mod_quad_init_v(mod_quad_t* quad, o_vector3_t v1, o_vector3_t v2, o_vector3_t v3, o_vector3_t v4)
@@ -50,8 +50,8 @@ void mod_quad_recolor(mod_quad_t* quad, o_color_t color)
 		return;
 	}
 
-	quad->v1.m_color = color;
-	quad->v2.m_color = color;
-	quad->v3.m_color = color;
-	quad->v4.m_color = color;
+	quad->m_vertex[0].m_color = color;
+	quad->m_vertex[1].m_color = color;
+	quad->m_vertex[2].m_color = color;
+	quad->m_vertex[3].m_color = color;
 }

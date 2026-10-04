@@ -107,6 +107,8 @@ static int32_t _mod_icosahedron_generate(mod_icosahedron_context_t* context, flo
 		mod_model_add_triangle_v(context->m_icosahedron, &v1, &v2, &v3, merge_vertices);
 	}
 
+    mod_model_scale_ff(context->m_icosahedron, radius);
+
 	mod_model_recolor_f(context->m_icosahedron, 1.0f, 1.0f, 1.0f, 1.0f);
     mod_model_recalculate_normals(context->m_icosahedron);
 

@@ -11,7 +11,7 @@ void mod_mesh_zero(mod_mesh_t* mesh)
 	mesh->m_index_buffer = NULL;
 }
 
-static int32_t _mod_mesh_initialize(mod_mesh_t* mesh, mod_vertex_decl_t* decl, const o_vertex_t* vertices, size_t vertex_count, const int32_t* indices, size_t index_count, int32_t flags)
+static int32_t _mod_mesh_initialize(mod_mesh_t* mesh, ALLEGRO_VERTEX_DECL* decl, const o_vertex_t* vertices, size_t vertex_count, const int32_t* indices, size_t index_count, int32_t flags)
 {
 	if (NULL == mesh || NULL == decl || NULL == vertices || NULL == indices || vertex_count == 0 || index_count == 0)
 	{
@@ -33,7 +33,7 @@ static int32_t _mod_mesh_initialize(mod_mesh_t* mesh, mod_vertex_decl_t* decl, c
 	return 0;
 }
 
-mod_mesh_t* mod_mesh_create(mod_vertex_decl_t* decl, const mod_model_t* model, int32_t flags)
+mod_mesh_t* mod_mesh_create(ALLEGRO_VERTEX_DECL* decl, const mod_model_t* model, int32_t flags)
 {
 	if (NULL == decl || NULL == model)
 	{
@@ -48,7 +48,7 @@ mod_mesh_t* mod_mesh_create(mod_vertex_decl_t* decl, const mod_model_t* model, i
 	return mod_mesh_create_v(decl, vertices, vertex_count, indices, index_count, flags);
 }
 
-mod_mesh_t* mod_mesh_create_v(mod_vertex_decl_t* decl, const o_vertex_t* vertices, size_t vertex_count, const int32_t* indices, size_t index_count, int32_t flags)
+mod_mesh_t* mod_mesh_create_v(ALLEGRO_VERTEX_DECL* decl, const o_vertex_t* vertices, size_t vertex_count, const int32_t* indices, size_t index_count, int32_t flags)
 {
 	if (NULL == decl || NULL == vertices || NULL == indices || vertex_count == 0 || index_count == 0)
 	{

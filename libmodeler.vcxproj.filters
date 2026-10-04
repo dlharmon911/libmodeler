@@ -51,6 +51,18 @@
     <ClCompile Include="src\mod_mesh_tile.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\mod_subdivider.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mod_edge.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mod_edge_map.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mod_mesh_sphere.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\libmodeler.h">

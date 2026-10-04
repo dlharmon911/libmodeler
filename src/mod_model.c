@@ -482,9 +482,9 @@ bool mod_model_add_triangle(mod_model_t* model, const mod_triangle_t* triangle, 
 		return false;
 	}
 
-	indices[0] = mod_model_add_vertex(model, &triangle->v1, merge_vertices);
-	indices[1] = mod_model_add_vertex(model, &triangle->v2, merge_vertices);
-	indices[2] = mod_model_add_vertex(model, &triangle->v3, merge_vertices);
+	indices[0] = mod_model_add_vertex(model, &triangle->m_vertex[0], merge_vertices);
+	indices[1] = mod_model_add_vertex(model, &triangle->m_vertex[1], merge_vertices);
+	indices[2] = mod_model_add_vertex(model, &triangle->m_vertex[2], merge_vertices);
 
 	if (indices[0] < 0 || indices[1] < 0 || indices[2] < 0)
 	{
@@ -511,9 +511,9 @@ bool mod_model_add_triangle_v(mod_model_t* model, const o_vertex_t* v1, const o_
 		return false;
 	}
 	mod_triangle_t triangle = { 0 };
-	triangle.v1 = *v1;
-	triangle.v2 = *v2;
-	triangle.v3 = *v3;
+	triangle.m_vertex[0] = *v1;
+	triangle.m_vertex[1] = *v2;
+	triangle.m_vertex[2] = *v3;
 	return mod_model_add_triangle(model, &triangle, merge_vertices);
 }
 
@@ -524,8 +524,8 @@ bool mod_model_add_quad(mod_model_t* model, const mod_quad_t* quad, bool merge_v
 		return false;
 	}
 
-	if (!mod_model_add_triangle_v(model, &quad->v1, &quad->v2, &quad->v3, merge_vertices) ||
-		!mod_model_add_triangle_v(model, &quad->v1, &quad->v3, &quad->v4, merge_vertices))
+	if (!mod_model_add_triangle_v(model, &quad->m_vertex[0], &quad->m_vertex[1], &quad->m_vertex[2], merge_vertices) ||
+		!mod_model_add_triangle_v(model, &quad->m_vertex[0], &quad->m_vertex[2], &quad->m_vertex[3], merge_vertices))
 	{
 		return false;
 	}
@@ -542,10 +542,10 @@ bool mod_model_add_quad_v(mod_model_t* model, const o_vertex_t* v1, const o_vert
 		return false;
 	}
 	mod_quad_t quad = { 0 };
-	quad.v1 = *v1;
-	quad.v2 = *v2;
-	quad.v3 = *v3;
-	quad.v4 = *v4;
+	quad.m_vertex[0] = *v1;
+	quad.m_vertex[1] = *v2;
+	quad.m_vertex[2] = *v3;
+	quad.m_vertex[3] = *v4;
 	return mod_model_add_quad(model, &quad, merge_vertices);
 }
 
@@ -603,21 +603,49 @@ bool mod_model_add_shape(mod_model_t* model, const o_vertex_t* vertices, size_t 
 		return false;
 	}
 
-	for (size_t i = 0; i < index_count; i += 3)
+	size_t vertex_start_index = mod_model_get_vertex_count(model);
+
+	for (size_t i = 0; i < vertex_count; ++i)
 	{
-		int32_t i1 = indices[i];
-		int32_t i2 = indices[i + 1];
-		int32_t i3 = indices[i + 2];
-
-		const o_vertex_t* v1 = (vertices + i1);
-		const o_vertex_t* v2 = (vertices + i2);
-		const o_vertex_t* v3 = (vertices + i3);
-
-		if (!mod_model_add_triangle_v(model, v1, v2, v3, merge_vertices))
+		if (!mod_model_push_vertex(model, vertices + i))
 		{
 			return false;
 		}
 	}
+
+	for (size_t i = 0; i < index_count; ++i)
+	{
+		int32_t index = indices[i] + (int32_t)vertex_start_index;
+		if (!mod_model_push_index(model, index))
+		{
+			return false;
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+	//for (size_t i = 0; i < index_count; i += 3)
+	//{
+	//	int32_t i1 = indices[i];
+	//	int32_t i2 = indices[i + 1];
+	//	int32_t i3 = indices[i + 2];
+
+	//	const o_vertex_t* v1 = (vertices + i1);
+	//	const o_vertex_t* v2 = (vertices + i2);
+	//	const o_vertex_t* v3 = (vertices + i3);
+
+	//	if (!mod_model_add_triangle_v(model, v1, v2, v3, merge_vertices))
+	//	{
+	//		return false;
+	//	}
+	//}
 
 	return true;
 }
@@ -672,6 +700,11 @@ void mod_model_scale_f(mod_model_t* model, float x, float y, float z)
 
 		vector->m_position = pos;
 	}
+}
+
+void mod_model_scale_ff(mod_model_t* model, float scale)
+{
+	mod_model_scale_f(model, scale, scale, scale);
 }
 
 void mod_model_translate(mod_model_t* model, o_vector3_t translation)
@@ -791,7 +824,7 @@ void mod_model_recalculate_normals(mod_model_t* model)
 	}
 }
 
-void mod_model_render(mod_vertex_decl_t* decl, const mod_model_t* model, o_texture_t* texture)
+void mod_model_render(ALLEGRO_VERTEX_DECL* decl, const mod_model_t* model, o_texture_t* texture)
 {
 	if (NULL == model)
 	{

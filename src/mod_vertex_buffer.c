@@ -11,7 +11,7 @@ static void mod_vertex_buffer_zero(mod_vertex_buffer_t* vertex_buffer)
 	vertex_buffer->m_vertex_count = 0;
 }
 
-static int32_t _mod_vertex_buffer_initialize(mod_vertex_buffer_t* vertex_buffer, mod_vertex_decl_t* decl, const o_vertex_t* vertices, size_t count, int32_t flags)
+static int32_t _mod_vertex_buffer_initialize(mod_vertex_buffer_t* vertex_buffer, ALLEGRO_VERTEX_DECL* decl, const o_vertex_t* vertices, size_t count, int32_t flags)
 {
 	if (NULL == vertex_buffer || NULL == decl || NULL == vertices || count <= 0)
 	{
@@ -32,7 +32,7 @@ static int32_t _mod_vertex_buffer_initialize(mod_vertex_buffer_t* vertex_buffer,
 }
 
 
-mod_vertex_buffer_t* mod_vertex_buffer_create(mod_vertex_decl_t* decl, const o_vertex_t* vertices, size_t count, int32_t flags)
+mod_vertex_buffer_t* mod_vertex_buffer_create(ALLEGRO_VERTEX_DECL* decl, const o_vertex_t* vertices, size_t count, int32_t flags)
 {
 	if (NULL == decl || NULL == vertices || count <= 0)
 	{

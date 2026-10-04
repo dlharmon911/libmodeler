@@ -265,9 +265,9 @@ mod_model_t* mod_tile_generate(float width, float height, float depth, float rad
 
 	mod_tile_context_zero(&context);
 
-	if (radius > 0.5f)
+	if (radius > 0.45f)
 	{
-		radius = 0.5f;
+		radius = 0.45f;
 	}
 
 	if (_mod_tile_generate(&context, 1.0f, 1.0f, 1.0f, radius, merge_vertices) != 0)
@@ -278,9 +278,8 @@ mod_model_t* mod_tile_generate(float width, float height, float depth, float rad
 	{
 		model = context.m_tile;
 		context.m_tile = NULL;
+		mod_model_scale_f(model, width, height, depth);
 	}
-
-	mod_model_scale_f(model, width, height, depth);
 
 	_mod_tile_context_destroy(&context);
 
